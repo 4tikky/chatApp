@@ -1,14 +1,5 @@
-// firebase.ts
-import { initializeApp, getApps, getApp } from "firebase/app";
-// PENTING: Import initializeAuth dan getReactNativePersistence untuk React Native
-import {
-  initializeAuth,
-  getReactNativePersistence,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile,
-  getAuth // Tetap diimport untuk tipe data jika perlu
-} from "firebase/auth";
+import { initializeApp } from "firebase/app";
+
 import {
   getFirestore,
   collection,
@@ -17,19 +8,26 @@ import {
   query,
   orderBy,
   onSnapshot,
+  doc,
+  setDoc,
+  getDoc,
   CollectionReference,
   DocumentData,
 } from "firebase/firestore";
-import {
-  getStorage,
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  uploadString,
-} from "firebase/storage";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Konfigurasi Firebase Anda
+import {
+  getAuth,
+  initializeAuth,
+  signInAnonymously,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  getReactNativePersistence
+} from "firebase/auth";
+
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+
 const firebaseConfig = {
   apiKey: "AIzaSyBluswJmF2cF7MeNdJMwngrvyzZzvjAoDg",
   authDomain: "chatapp2-e78a0.firebaseapp.com",
@@ -40,37 +38,32 @@ const firebaseConfig = {
   measurementId: "G-XXV50H52NB",
 };
 
-// 1. Inisialisasi App (Cegah inisialisasi ganda)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const app = initializeApp(firebaseConfig);
 
-// 2. Inisialisasi Auth dengan AsyncStorage (KHUSUS REACT NATIVE)
-// Jika pakai getAuth(app) biasa, user akan logout tiap aplikasi direstart
+// Initialize Auth with persistence managed by React Native (AsyncStorage)
 const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
 });
 
-// 3. Inisialisasi Service lain
 const db = getFirestore(app);
-const storage = getStorage(app);
 
-// 4. Helper Collection
 export const messagesCollection = collection(db, "messages") as CollectionReference<DocumentData>;
 
-// 5. Export semuanya agar bisa dipakai di screen lain
 export {
   auth,
   db,
-  storage,
+  collection,
   addDoc,
   serverTimestamp,
   query,
   orderBy,
   onSnapshot,
-  createUserWithEmailAndPassword,
+  doc,
+  setDoc,
+  getDoc,
+  signInAnonymously,
   signInWithEmailAndPassword,
-  updateProfile,
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  uploadString,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
 };
