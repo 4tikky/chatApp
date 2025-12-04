@@ -1,10 +1,13 @@
 // firebase.ts
 import { initializeApp, getApps, getApp } from "firebase/app";
+// PENTING: Import initializeAuth dan getReactNativePersistence untuk React Native
 import {
-  getAuth,
+  initializeAuth,
+  getReactNativePersistence,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
+  getAuth // Tetap diimport untuk tipe data jika perlu
 } from "firebase/auth";
 import {
   getFirestore,
@@ -17,7 +20,6 @@ import {
   CollectionReference,
   DocumentData,
 } from "firebase/firestore";
-
 import {
   getStorage,
   ref,
@@ -25,9 +27,9 @@ import {
   getDownloadURL,
   uploadString,
 } from "firebase/storage";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-//const storage = getStorage(app);
-
+// Konfigurasi Firebase Anda
 const firebaseConfig = {
   apiKey: "AIzaSyBluswJmF2cF7MeNdJMwngrvyzZzvjAoDg",
   authDomain: "chatapp2-e78a0.firebaseapp.com",
@@ -38,19 +40,27 @@ const firebaseConfig = {
   measurementId: "G-XXV50H52NB",
 };
 
-// Hindari duplicate initialization
+// 1. Inisialisasi App (Cegah inisialisasi ganda)
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-const auth = getAuth(app);
+// 2. Inisialisasi Auth dengan AsyncStorage (KHUSUS REACT NATIVE)
+// Jika pakai getAuth(app) biasa, user akan logout tiap aplikasi direstart
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
+
+// 3. Inisialisasi Service lain
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-export const messagesCollection =
-  collection(db, "messages") as CollectionReference<DocumentData>;
+// 4. Helper Collection
+export const messagesCollection = collection(db, "messages") as CollectionReference<DocumentData>;
 
+// 5. Export semuanya agar bisa dipakai di screen lain
 export {
   auth,
   db,
+  storage,
   addDoc,
   serverTimestamp,
   query,
